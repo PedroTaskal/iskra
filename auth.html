@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вхід / Реєстрація — Іскра: Знайди свою пару миттєво</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Google Fonts: Montserrat для заголовків, Poppins для тексту -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome для іконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="auth-page-body">
+
+    <!-- Header Section (Minimalistic, as it's an auth page) -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="index.html" class="logo">Іскра</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="auth-main">
+        <div class="auth-container">
+            <div class="form-wrapper">
+                <div class="auth-tabs">
+                    <button class="tab-button active" data-tab="login">Вхід</button>
+                    <button class="tab-button" data-tab="register">Реєстрація</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form active">
+                    <h2>Вхід</h2>
+                    <div class="input-group">
+                        <label for="login-email">Електронна пошта</label>
+                        <input type="email" id="login-email" placeholder="Ваша пошта" required autocomplete="email">
+                    </div>
+                    <div class="input-group">
+                        <label for="login-password">Пароль</label>
+                        <input type="password" id="login-password" placeholder="Ваш пароль" required autocomplete="current-password">
+                    </div>
+                    <a href="#" class="forgot-password">Забули пароль?</a>
+                    <button type="submit" class="btn btn-primary btn-full-width">Увійти</button>
+
+                    <p class="separator">Або увійдіть за допомогою:</p>
+                    <div class="social-login">
+                        <button type="button" class="social-button google"><i class="fab fa-google"></i> Google</button>
+                        <button type="button" class="social-button facebook"><i class="fab fa-facebook-f"></i> Facebook</button>
+                        <button type="button" class="social-button telegram"><i class="fab fa-telegram-plane"></i> Telegram</button>
+                    </div>
+                    <p class="switch-link">Ще не маєте облікового запису? <a href="#" data-switch-to="register">Зареєструватися</a></p>
+                </form>
+
+                <!-- Registration Form -->
+                <form id="register-form" class="auth-form">
+                    <h2>Реєстрація</h2>
+                    <div class="input-group">
+                        <label for="register-email">Електронна пошта</label>
+                        <input type="email" id="register-email" placeholder="Ваша пошта" required autocomplete="email">
+                    </div>
+                    <div class="input-group">
+                        <label for="register-password">Пароль</label>
+                        <input type="password" id="register-password" placeholder="Придумайте пароль" required autocomplete="new-password">
+                    </div>
+                    <div class="input-group">
+                        <label for="confirm-password">Повторіть пароль</label>
+                        <input type="password" id="confirm-password" placeholder="Повторіть пароль" required autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full-width">Зареєструватися</button>
+
+                    <p class="separator">Або зареєструйтесь за допомогою:</p>
+                    <div class="social-login">
+                        <button type="button" class="social-button google"><i class="fab fa-google"></i> Google</button>
+                        <button type="button" class="social-button facebook"><i class="fab fa-facebook-f"></i> Facebook</button>
+                        <button type="button" class="social-button telegram"><i class="fab fa-telegram-plane"></i> Telegram</button>
+                    </div>
+                     <p class="switch-link">Вже маєте обліковий запис? <a href="#" data-switch-to="login">Увійти</a></p>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
