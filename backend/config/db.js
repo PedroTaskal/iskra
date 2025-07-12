@@ -1,0 +1,20 @@
+// backend/config/db.js
+const mongoose = require('mongoose');
+require('dotenv').config({ path: '../.env' }); // Важливо: шлях до .env відносно кореня проекту або де він лежить
+
+const connectDB = async () => {
+    try {
+        const conn = await mongoose.connect(process.env.MONGO_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            // useCreateIndex: true, // Deprecated in Mongoose 6+
+            // useFindAndModify: false // Deprecated in Mongoose 6+
+        });
+        console.log(`MongoDB Connected: ${conn.connection.host}`);
+    } catch (err) {
+        console.error(`Error: ${err.message}`);
+        process.exit(1); // Вийти з процесу з помилкою
+    }
+};
+
+module.exports = connectDB;
