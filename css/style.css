@@ -822,3 +822,84 @@ p {
         padding: 14px 15px;
     }
 }
+
+
+
+/* --- Modal Popup Styles (for index.html) --- */
+.auth-modal {
+    display: none; /* Приховано за замовчуванням */
+    position: fixed; /* Залишається на місці навіть при прокручуванні */
+    z-index: 10000; /* Перекриває все інше */
+    left: 0;
+    top: 0;
+    width: 100%; /* Повна ширина */
+    height: 100%; /* Повна висота */
+    overflow: auto; /* Дозволити прокручування, якщо контент завеликий */
+    background-color: rgba(0, 0, 0, 0.7); /* Напівпрозорий чорний фон */
+    display: flex; /* Для центрування контенту */
+    justify-content: center; /* Центрування по горизонталі */
+    align-items: center; /* Центрування по вертикалі */
+    opacity: 0; /* Для анімації зникнення/появи */
+    visibility: hidden; /* Для повного приховування, щоб елементи не були клікабельними */
+    transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+}
+
+.auth-modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.auth-modal-content {
+    background-color: var(--dark-alt-bg);
+    margin: auto;
+    padding: 30px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 450px; /* Обмеження ширини, як на auth.html */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    position: relative;
+    transform: scale(0.9); /* Для анімації збільшення */
+    transition: transform 0.3s ease-out;
+}
+
+.auth-modal.show .auth-modal-content {
+    transform: scale(1);
+}
+
+.close-button {
+    color: var(--light-text-color);
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: var(--primary-gradient); /* Не забудьте, що primary-gradient це градієнт, тому може не виглядати як очікується */
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+
+/* Додаткові медіа-запити для модального вікна, якщо потрібно */
+@media (max-width: 600px) {
+    .auth-modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+    .close-button {
+        font-size: 30px;
+        top: 10px;
+        right: 15px;
+    }
+}
+
