@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Common functionality for both pages (index.html & auth.html) ---
+    // --- Common functionality for both pages ---
 
     // Animate elements on scroll using Intersection Observer
     const animateElements = document.querySelectorAll('.animate-fade-in, .animate-slide-up, .animate-scale-in');
@@ -22,8 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(element);
     });
 
-    // Trigger initial animations for elements in viewport on load
-    // A small delay makes it feel smoother
     setTimeout(() => {
         animateElements.forEach(element => {
             if (element.getBoundingClientRect().top < window.innerHeight) {
@@ -32,11 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, 100);
 
-    // Smooth scrolling for navigation links (only relevant for index.html)
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
-            // Check if current page is index.html before smooth scrolling
-            // This prevents smooth scrolling from auth.html to index.html sections
             if (window.location.pathname.endsWith('/') || window.location.pathname.endsWith('/index.html')) {
                 e.preventDefault();
                 document.querySelector(this.getAttribute('href')).scrollIntoView({
@@ -46,10 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Simple sticky header background change (applied to both pages)
     const header = document.querySelector('.header');
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 0) { // Changes as soon as scroll starts
+        if (window.scrollY > 0) {
             header.style.backgroundColor = 'rgba(26, 26, 46, 0.95)';
             header.style.boxShadow = '0 5px 20px rgba(0,0,0,0.5)';
         } else {
@@ -58,16 +52,53 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- Authentication Logic (reusable function) ---
+    // This function handles the fetch requests for both login and register
+    const handleAuthSubmission = async (endpoint, formData, formType, modalInstance = null) => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/auth/${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message);
+                console.log(`${formType} successful:`, data);
+                localStorage.setItem('token', data.token); // Store token
+
+                if (modalInstance) { // If submitted from a modal, hide it
+                    modalInstance.hide();
+                    if (window.popupTimer) { // Clear the popup timer if it exists
+                        clearInterval(window.popupTimer);
+                    }
+                    // Optionally, you might want to reload the page or update UI
+                    // window.location.reload();
+                } else { // If submitted from auth.html, redirect
+                    window.location.href = 'index.html'; // Or a user dashboard page
+                }
+            } else {
+                alert(`Помилка ${formType}: ${data.message || 'Невідома помилка'}`);
+                console.error(`${formType} error:`, data);
+            }
+        } catch (error) {
+            console.error(`Network error during ${formType}:`, error);
+            alert('Помилка підключення до сервера. Будь ласка, спробуйте пізніше.');
+        }
+    };
+
 
     // --- Specific functionality for auth.html ---
-    // This block of code will only execute if the 'auth-container' element exists on the page.
     const authContainer = document.querySelector('.auth-container');
     if (authContainer) {
-        const tabButtons = document.querySelectorAll('.tab-button');
-        const authForms = document.querySelectorAll('.auth-form');
-        const switchLinks = document.querySelectorAll('.switch-link a');
+        const tabButtons = document.querySelectorAll('.auth-container .tab-button');
+        const authForms = document.querySelectorAll('.auth-container .auth-form');
+        const switchLinks = document.querySelectorAll('.auth-container .switch-link a');
 
-        // Function to switch between login and register forms
         const switchToForm = (targetTab) => {
             tabButtons.forEach(button => {
                 if (button.dataset.tab === targetTab) {
@@ -86,107 +117,145 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
 
-        // Event listeners for tab buttons (Login/Register tabs)
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
                 switchToForm(button.dataset.tab);
             });
         });
 
-        // Event listeners for switch links (e.g., "Don't have an account? Register" / "Already have an account? Login")
         switchLinks.forEach(link => {
             link.addEventListener('click', (e) => {
-                e.preventDefault(); // Prevent default link behavior
+                e.preventDefault();
                 switchToForm(link.dataset.switchTo);
             });
         });
 
-        // --- Handle form submissions (NOW CONNECTED TO BACKEND) ---
-
-        // Login Form Submission
         document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault(); // Prevent default form submission and page reload
+            e.preventDefault();
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
-
-            try {
-                // Send login request to your Node.js backend
-                const response = await fetch('http://localhost:5000/api/auth/login', {
-                    method: 'POST', // Use POST method for login
-                    headers: {
-                        'Content-Type': 'application/json', // Tell the server we are sending JSON
-                    },
-                    body: JSON.stringify({ email, password }), // Convert data to JSON string
-                });
-
-                const data = await response.json(); // Parse the JSON response from the server
-
-                if (response.ok) { // Check if the HTTP status code is 2xx (success)
-                    alert(data.message); // Show success message from backend
-                    console.log('Login successful:', data);
-                    localStorage.setItem('token', data.token); // Store the JWT token
-                    // Redirect user to the main page or a user dashboard
-                    window.location.href = 'index.html';
-                } else { // Handle server-side errors (e.g., 400, 500)
-                    alert(`Помилка входу: ${data.message || 'Невідома помилка'}`);
-                    console.error('Login error:', data);
-                }
-            } catch (error) { // Handle network errors (e.g., server not running, no internet)
-                console.error('Network error during login:', error);
-                alert('Помилка підключення до сервера. Будь ласка, перевірте з\'єднання або спробуйте пізніше.');
-            }
+            await handleAuthSubmission('login', { email, password }, 'входу');
         });
 
-        // Registration Form Submission
         document.getElementById('register-form').addEventListener('submit', async (e) => {
-            e.preventDefault(); // Prevent default form submission and page reload
+            e.preventDefault();
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
 
-            // Basic client-side validation: check if passwords match
             if (password !== confirmPassword) {
                 alert('Паролі не співпадають!');
-                return; // Stop the function if passwords don't match
+                return;
             }
-
-            try {
-                // Send registration request to your Node.js backend
-                const response = await fetch('http://localhost:5000/api/auth/register', {
-                    method: 'POST', // Use POST method for registration
-                    headers: {
-                        'Content-Type': 'application/json', // Tell the server we are sending JSON
-                    },
-                    body: JSON.stringify({ email, password }), // Convert data to JSON string
-                });
-
-                const data = await response.json(); // Parse the JSON response from the server
-
-                if (response.ok) { // Check if the HTTP status code is 2xx (success)
-                    alert(data.message); // Show success message from backend
-                    console.log('Registration successful:', data);
-                    localStorage.setItem('token', data.token); // Store the JWT token
-                    // Redirect user after successful registration
-                    window.location.href = 'index.html'; // Or a user dashboard page
-                } else { // Handle server-side errors (e.g., 400, 500)
-                    alert(`Помилка реєстрації: ${data.message || 'Невідома помилка'}`);
-                    console.error('Registration error:', data);
-                }
-            } catch (error) { // Handle network errors
-                console.error('Network error during registration:', error);
-                alert('Помилка підключення до сервера. Будь ласка, перевірте з\'єднання або спробуйте пізніше.');
-            }
+            await handleAuthSubmission('register', { email, password }, 'реєстрації');
         });
 
-        // Handle social login buttons (still placeholder, as they require separate OAuth setup)
         document.querySelectorAll('.social-button').forEach(button => {
             button.addEventListener('click', (e) => {
-                e.preventDefault(); // Prevent default button behavior
+                e.preventDefault();
                 const provider = button.textContent.trim();
-                alert(`Ви обрали вхід через ${provider}. Для цього потрібна додаткова інтеграція з API ${provider}.`);
+                alert(`Ви обрали вхід через ${provider}. Для цього потрібна додаткова інтеграція.`);
                 console.log(`Attempting social login with: ${provider}`);
-                // In a real application, you would redirect the user to the OAuth provider's login page
             });
         });
+    }
+
+
+    // --- Popup Modal Logic (for index.html) ---
+    const authModal = document.getElementById('auth-modal');
+    // Ensure we are on the index page and the modal element exists
+    if (window.location.pathname.endsWith('/') || window.location.pathname.endsWith('/index.html')) {
+        const closeButton = authModal.querySelector('.close-button');
+        const modalTabButtons = authModal.querySelectorAll('.tab-button');
+        const modalAuthForms = authModal.querySelectorAll('.auth-form');
+        const modalSwitchLinks = authModal.querySelectorAll('.switch-link a');
+
+        const showModal = () => {
+            if (!localStorage.getItem('token')) { // Show only if user is NOT logged in
+                authModal.classList.add('show');
+            }
+        };
+
+        const hideModal = () => {
+            authModal.classList.remove('show');
+        };
+
+        // Event listeners for closing modal
+        closeButton.addEventListener('click', hideModal);
+        authModal.addEventListener('click', (e) => {
+            if (e.target === authModal) { // Clicked on overlay, not content
+                hideModal();
+            }
+        });
+
+        // Toggle between login/register forms within the modal
+        const switchModalForm = (targetTab) => {
+            modalTabButtons.forEach(button => {
+                if (button.dataset.tab === targetTab) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+
+            modalAuthForms.forEach(form => {
+                if (form.id === `${targetTab}-form`) {
+                    form.classList.add('active');
+                } else {
+                    form.classList.remove('active');
+                }
+            });
+        };
+
+        modalTabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                switchModalForm(button.dataset.tab);
+            });
+        });
+
+        modalSwitchLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchModalForm(link.dataset.switchTo);
+            });
+        });
+
+        // Form submission inside modal
+        document.getElementById('modal-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('modal-login-email').value;
+            const password = document.getElementById('modal-login-password').value;
+            await handleAuthSubmission('login', { email, password }, 'входу', { hide: hideModal });
+        });
+
+        document.getElementById('modal-register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('modal-register-email').value;
+            const password = document.getElementById('modal-register-password').value;
+            const confirmPassword = document.getElementById('modal-confirm-password').value;
+
+            if (password !== confirmPassword) {
+                alert('Паролі не співпадають!');
+                return;
+            }
+            await handleAuthSubmission('register', { email, password }, 'реєстрації', { hide: hideModal });
+        });
+
+        // Social login buttons inside modal (placeholder)
+        authModal.querySelectorAll('.social-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const provider = button.textContent.trim();
+                alert(`Ви обрали вхід через ${provider}. Для цього потрібна додаткова інтеграція.`);
+                console.log(`Attempting social login with: ${provider}`);
+            });
+        });
+
+
+        // Timer for popup (only if user is not logged in)
+        if (!localStorage.getItem('token')) {
+            const popupInterval = 15 * 1000; // 15 секунд
+            window.popupTimer = setInterval(showModal, popupInterval); // Store timer ID globally
+        }
     }
 });
