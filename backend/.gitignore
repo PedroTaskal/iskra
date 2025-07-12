@@ -1,2 +1,5 @@
 node_modules/
 .env
+
+# Ігноруємо папку з залежностями
+backend/node_modules/
