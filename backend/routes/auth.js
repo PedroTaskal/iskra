@@ -1,13 +1,13 @@
-// backend/routes/auth.js
+// IskraDatingApp/backend/routes/auth.js
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User'); // Переконайтесь, що шлях правильний
+const User = require('../models/User'); // Шлях від routes до models
 const jwt = require('jsonwebtoken');
-require('dotenv').config({ path: '../../.env' }); // Переконайтесь, що шлях правильний
+// dotenv.config() вже викликається в server.js, тому тут не потрібно.
 
-// Функція для генерації JWT (залишається без змін)
+// Функція для генерації JWT
 const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
+    return jwt.sign({ id }, process.env.JWT_SECRET, { // process.env.JWT_SECRET буде доступний
         expiresIn: '1h', // Токен дійсний 1 годину
     });
 };
@@ -29,10 +29,10 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ message: 'Користувач з таким email вже існує' });
         }
 
-        // Тепер пароль зберігається в чистому вигляді
+        // Пароль буде автоматично хешований завдяки UserSchema.pre('save')
         user = await User.create({
             email,
-            password // Пароль передається як є
+            password
         });
 
         res.status(201).json({
@@ -41,9 +41,12 @@ router.post('/register', async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error.message);
-        // Залишаємо 500 для інших непередбачених помилок
-        res.status(500).json({ message: 'Помилка сервера' }); 
+        console.error(error.message); // Логування помилки для розробника
+        // У разі помилки від MongoDB (наприклад, дублікат ключа при унікальному email)
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'Цей email вже зареєстрований.' });
+        }
+        res.status(500).json({ message: 'Помилка сервера під час реєстрації.' });
     }
 });
 
@@ -58,19 +61,18 @@ router.post('/login', async (req, res) => {
     }
 
     try {
-        // !!! ЗМІНА ТУТ !!!: Більше не потрібно select('+password'), оскільки воно не було select: false
-        const user = await User.findOne({ email }); 
+        // Явно вибираємо пароль, оскільки він має select: false
+        const user = await User.findOne({ email }).select('+password');
 
         if (!user) {
-            return res.status(400).json({ message: 'Невірні облікові дані' });
+            return res.status(400).json({ message: 'Невірні облікові дані.' });
         }
 
-        // !!! ЗМІНА ТУТ !!!: Пряме порівняння паролів
-        // const isMatch = await user.matchPassword(password); // Цей метод видалено
-        const isMatch = (password === user.password); // Пряме порівняння
+        // Використовуємо метод, визначений у моделі User для порівняння хешів
+        const isMatch = await user.matchPassword(password);
 
         if (!isMatch) {
-            return res.status(400).json({ message: 'Невірні облікові дані' });
+            return res.status(400).json({ message: 'Невірні облікові дані.' });
         }
 
         res.json({
@@ -79,8 +81,8 @@ router.post('/login', async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ message: 'Помилка сервера' });
+        console.error(error.message); // Логування помилки для розробника
+        res.status(500).json({ message: 'Помилка сервера під час входу.' });
     }
 });
 
