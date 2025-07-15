@@ -30,8 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, 100);
 
+    // Smooth scrolling for navigation links (only relevant for index.html)
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
+            // Check if current page is index.html before smooth scrolling
             if (window.location.pathname.endsWith('/') || window.location.pathname.endsWith('/index.html')) {
                 e.preventDefault();
                 document.querySelector(this.getAttribute('href')).scrollIntoView({
@@ -41,9 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Sticky Header Background on Scroll
     const header = document.querySelector('.header');
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 0) {
+        if (window.scrollY > 0) { // Changes as soon as scroll starts
             header.style.backgroundColor = 'rgba(26, 26, 46, 0.95)';
             header.style.boxShadow = '0 5px 20px rgba(0,0,0,0.5)';
         } else {
@@ -52,11 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Authentication Logic (reusable function) ---
+    // --- Reusable Authentication Logic ---
     // This function handles the fetch requests for both login and register
     const handleAuthSubmission = async (endpoint, formData, formType, modalInstance = null) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/auth/${endpoint}`, {
+            const response = await fetch('http://localhost:5000/api/auth/' + endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -73,10 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (modalInstance) { // If submitted from a modal, hide it
                     modalInstance.hide();
-                    if (window.popupTimer) { // Clear the popup timer if it exists
+                    // Clear the popup timer if it exists and successfully logged in
+                    if (window.popupTimer) {
                         clearInterval(window.popupTimer);
+                        window.popupTimer = null; // Clear reference
                     }
-                    // Optionally, you might want to reload the page or update UI
+                    // Optionally, you might want to reload the page or update UI after successful login
                     // window.location.reload();
                 } else { // If submitted from auth.html, redirect
                     window.location.href = 'index.html'; // Or a user dashboard page
@@ -92,9 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
 
-    // --- Specific functionality for auth.html ---
+    // --- Specific functionality for auth.html page ---
     const authContainer = document.querySelector('.auth-container');
-    if (authContainer) {
+    if (authContainer) { // This code block runs ONLY if auth.html is loaded
         const tabButtons = document.querySelectorAll('.auth-container .tab-button');
         const authForms = document.querySelectorAll('.auth-container .auth-form');
         const switchLinks = document.querySelectorAll('.auth-container .switch-link a');
@@ -130,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+        // Form submission on auth.html
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -150,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await handleAuthSubmission('register', { email, password }, 'реєстрації');
         });
 
+        // Social login buttons on auth.html (placeholder)
         document.querySelectorAll('.social-button').forEach(button => {
             button.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -163,8 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Popup Modal Logic (for index.html) ---
     const authModal = document.getElementById('auth-modal');
-    // Ensure we are on the index page and the modal element exists
-    if (window.location.pathname.endsWith('/') || window.location.pathname.endsWith('/index.html')) {
+    // This code block runs ONLY if authModal element exists (i.e., on index.html)
+    if (authModal) {
         const closeButton = authModal.querySelector('.close-button');
         const modalTabButtons = authModal.querySelectorAll('.tab-button');
         const modalAuthForms = authModal.querySelectorAll('.auth-form');
@@ -173,6 +180,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const showModal = () => {
             if (!localStorage.getItem('token')) { // Show only if user is NOT logged in
                 authModal.classList.add('show');
+            } else {
+                // If user somehow logs in before timer fires, clear it
+                if (window.popupTimer) {
+                    clearInterval(window.popupTimer);
+                    window.popupTimer = null;
+                }
             }
         };
 
@@ -253,9 +266,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         // Timer for popup (only if user is not logged in)
+        // Set an initial timeout to avoid showing modal immediately on page load
+        // and then set the repeating interval.
+        const initialDelay = 5 * 1000; // Show first popup after 5 seconds
+        const subsequentInterval = 15 * 1000; // Subsequent popups every 15 seconds
+
         if (!localStorage.getItem('token')) {
-            const popupInterval = 15 * 1000; // 15 секунд
-            window.popupTimer = setInterval(showModal, popupInterval); // Store timer ID globally
+            console.log('User not logged in. Starting popup timer.');
+            // Show first modal after initialDelay
+            setTimeout(() => {
+                showModal();
+                // Then set repeating interval for subsequent modals
+                window.popupTimer = setInterval(showModal, subsequentInterval);
+            }, initialDelay);
+        } else {
+            console.log('User logged in. Popup timer not started.');
         }
     }
 });
