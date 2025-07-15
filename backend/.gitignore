@@ -1,8 +1,24 @@
-# Ігноруємо папку з залежностями
-backend/node_modules/
+# Node.js modules for backend
+/backend/node_modules/
+/backend/.env
+/backend/npm-debug.log
+/backend/*.log
+
+# Frontend (if it also had node_modules or temp files)
+/frontend/node_modules/
+/frontend/npm-debug.log
+/frontend/*.log
+
+# Operating System Files
+.DS_Store # macOS
+Thumbs.db # Windows
 
 # Ігноруємо файл з секретними даними
 backend/.env
 
-# Системні файли macOS
-.DS_Store
+# VS Code specific settings
+.vscode/
+
+# Other temporary files
+*.tmp
+*.log
