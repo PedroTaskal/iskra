@@ -16,9 +16,14 @@ const app = express();
 app.use(express.json()); // Дозволяє серверу приймати JSON в тілі запиту
 app.use(cors()); // Дозволяє Cross-Origin Resource Sharing
 
-// Базовий маршрут (для тестування)
+// === Маршрути для сторінок ===
+app.get("/users.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "index.html"));
+});
+
 app.get('/', (req, res) => {
-    res.send('API is running...');
+    // res.send('API is running...');
+      res.sendFile(path.join(__dirname, "..", "auth.html"));
 });
 
 // Маршрути для автентифікації
