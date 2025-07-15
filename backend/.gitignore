@@ -1,5 +1,8 @@
-node_modules/
-.env
-
 # Ігноруємо папку з залежностями
 backend/node_modules/
+
+# Ігноруємо файл з секретними даними
+backend/.env
+
+# Системні файли macOS
+.DS_Store
