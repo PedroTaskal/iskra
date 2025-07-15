@@ -18,12 +18,12 @@ app.use(cors()); // Дозволяє Cross-Origin Resource Sharing
 
 // === Маршрути для сторінок ===
 app.get("/users.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "index.html"));
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 app.get('/', (req, res) => {
     // res.send('API is running...');
-      res.sendFile(path.join(__dirname, "..", "auth.html"));
+      res.sendFile(path.join(__dirname, "auth.html"));
 });
 
 // Маршрути для автентифікації
