@@ -4,7 +4,6 @@ const connectDB = require("./config/db");
 const dotenv = require("dotenv");
 const cors = require("cors"); // Імпортуємо cors
 const path = require("path");
-const { protect } = require('./middleware/authMiddleware'); 
 
 // Завантаження змінних оточення з .env файлу
 dotenv.config({ path: "./.env" }); // Шлях до .env відносно кореня проекту
@@ -19,7 +18,7 @@ app.use(express.json()); // Дозволяє серверу приймати JSO
 app.use(cors()); // Дозволяє Cross-Origin Resource Sharing
 
 // === Маршрути для сторінок ===
-app.get("/index.html", protect, (req, res) => {
+app.get("/index.html", (req, res) => {
   console.log("index.html served");
   res.sendFile(path.join(__dirname, "..", "frontend", "index.html"));
 });
