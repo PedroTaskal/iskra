@@ -1,11 +1,13 @@
 // backend/server.js
-const express = require('express');
-const connectDB = require('./config/db');
-const dotenv = require('dotenv');
-const cors = require('cors'); // Імпортуємо cors
+const express = require("express");
+const connectDB = require("./config/db");
+const dotenv = require("dotenv");
+const cors = require("cors"); // Імпортуємо cors
+const path = require("path");
+const { protect } = require('./middleware/authMiddleware'); 
 
 // Завантаження змінних оточення з .env файлу
-dotenv.config({ path: './.env' }); // Шлях до .env відносно кореня проекту
+dotenv.config({ path: "./.env" }); // Шлях до .env відносно кореня проекту
 
 // Підключення до бази даних
 connectDB();
@@ -17,17 +19,20 @@ app.use(express.json()); // Дозволяє серверу приймати JSO
 app.use(cors()); // Дозволяє Cross-Origin Resource Sharing
 
 // === Маршрути для сторінок ===
-app.get("/users.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+app.get("/index.html", protect, (req, res) => {
+  console.log("index.html served");
+  res.sendFile(path.join(__dirname, "..", "frontend", "index.html"));
 });
 
-app.get('/', (req, res) => {
-    // res.send('API is running...');
-      res.sendFile(path.join(__dirname, "auth.html"));
+app.get("/", (req, res) => {
+  console.log("Root path accessed, redirecting to auth.html");
+  res.sendFile(path.join(__dirname, "..", "frontend", "auth.html"));
 });
 
 // Маршрути для автентифікації
-app.use('/api/auth', require('./routes/auth'));
+app.use("/api/auth", require("./routes/auth"));
+
+app.use(express.static(path.join(__dirname, "..", "frontend")));
 
 // Порт, на якому буде працювати сервер
 const PORT = process.env.PORT || 5000;

@@ -3,8 +3,6 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User'); // Цей шлях коректний
 const jwt = require('jsonwebtoken');
-// Старий: require('dotenv').config({ path: '../.env' });
-require('dotenv').config({ path: '../../.env' }); // Важливо: шлях до .env
 
 // Функція для генерації JWT
 const generateToken = (id) => {

@@ -1,6 +1,5 @@
 // backend/config/db.js
 const mongoose = require('mongoose');
-require('dotenv').config({ path: '../.env' }); // Важливо: шлях до .env відносно кореня проекту або де він лежить
 
 const connectDB = async () => {
     try {
