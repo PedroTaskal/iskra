@@ -1,48 +1,38 @@
-// IskraDatingApp/backend/server.js
-const express = require('express');
-const dotenv = require('dotenv'); // Завантажуємо dotenv ПЕРШИМ
-const connectDB = require('./config/db'); // Підключення до бази даних
-const cors = require('cors'); // Для CORS-політики
+// backend/server.js
+const express = require("express");
+const connectDB = require("./config/db");
+const dotenv = require("dotenv");
+const cors = require("cors"); // Імпортуємо cors
+const path = require("path");
+const { protect } = require('./middleware/authMiddleware'); 
 
 // Завантаження змінних оточення з .env файлу
-// Шлях `./.env` означає, що .env знаходиться в тій же папці, що й server.js
-dotenv.config({ path: './.env' }); 
+dotenv.config({ path: "./.env" }); // Шлях до .env відносно кореня проекту
 
 // Підключення до бази даних
 connectDB();
 
 const app = express();
 
-// Middleware для обробки JSON запитів
-app.use(express.json());
-// Middleware для CORS. Дозволяємо запити з фронтенду, який працює на іншому порту.
-app.use(cors({
-    origin: 'http://127.0.0.1:5501', // Дозволити запити тільки з Live Server порту вашого фронтенду
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// Middleware
+app.use(express.json()); // Дозволяє серверу приймати JSON в тілі запиту
+app.use(cors()); // Дозволяє Cross-Origin Resource Sharing
 
-// !!! ВИДАЛЄНО/ЗАКОМЕНТОВАНО БАЗОВИЙ ТЕСТОВИЙ МАРШРУТ !!!
-// app.get('/', (req, res) => {
-//     res.send('Iskra Backend API is running...');
-// });
-
-// Маршрути для автентифікації користувачів
-app.use('/api/auth', require('./routes/auth'));
-
-// Обробка неіснуючих маршрутів (404 Not Found) - це стандартно для API
-app.use((req, res, next) => {
-    res.status(404).json({ message: 'Маршрут не знайдено' });
+// === Маршрути для сторінок ===
+app.get("/index.html", protect, (req, res) => {
+  console.log("index.html served");
+  res.sendFile(path.join(__dirname, "..", "frontend", "index.html"));
 });
 
-// Глобальний обробник помилок (опціонально, але корисно)
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(err.statusCode || 500).json({
-        message: err.message || 'Внутрішня помилка сервера'
-    });
+app.get("/", (req, res) => {
+  console.log("Root path accessed, redirecting to auth.html");
+  res.sendFile(path.join(__dirname, "..", "frontend", "auth.html"));
 });
 
+// Маршрути для автентифікації
+app.use("/api/auth", require("./routes/auth"));
+
+app.use(express.static(path.join(__dirname, "..", "frontend")));
 
 // Порт, на якому буде працювати сервер (завантажується з .env)
 const PORT = process.env.PORT || 5000;

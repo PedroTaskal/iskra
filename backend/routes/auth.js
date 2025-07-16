@@ -3,7 +3,6 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User'); // Шлях від routes до models
 const jwt = require('jsonwebtoken');
-// dotenv.config() вже викликається в server.js, тому тут не потрібно.
 
 // Функція для генерації JWT
 const generateToken = (id) => {

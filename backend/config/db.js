@@ -1,7 +1,6 @@
 // IskraDatingApp/backend/config/db.js
 const mongoose = require('mongoose');
 
-
 const connectDB = async () => {
     try {
         // process.env.MONGO_URI буде доступний, оскільки dotenv.config() вже спрацював у server.js
