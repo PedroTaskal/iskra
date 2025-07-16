@@ -1,5 +1,21 @@
 document.addEventListener("DOMContentLoaded", () => {
   // --- Common functionality for both pages ---
+  let API_BASE_URL;
+  const hostname = window.location.hostname;
+
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    // Ми все ще на локальному сервері, тому тут залишаємо localhost
+    API_BASE_URL = "http://localhost:5000";
+    console.log("Running in DEVELOPMENT mode. API URL:", API_BASE_URL);
+  } else {
+    // Ми на реальному хостингу. Формуємо URL динамічно.
+    // Припускаємо, що адреса бекенда відрізняється лише заміною "-frontend" на "-backend"
+    // (Або будь-якою іншою частиною, яка у вас відрізняється)
+    const backendHostname = hostname.replace("-frontend", "-backend");
+
+    API_BASE_URL = `https://${backendHostname}`;
+    console.log("Running in PRODUCTION mode. Derived API URL:", API_BASE_URL);
+  }
 
   // Animate elements on scroll using Intersection Observer
   const animateElements = document.querySelectorAll(
@@ -47,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         // === ОСЬ КЛЮЧОВИЙ МОМЕНТ ===
-        const response = await fetch("http://localhost:5000/api/auth/me", {
+        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -124,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ) => {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/auth/" + endpoint,
+        `${API_BASE_URL}/api/auth/` + endpoint,
         {
           method: "POST",
           headers: {
